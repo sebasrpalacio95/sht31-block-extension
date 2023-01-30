@@ -9,7 +9,7 @@ let temp_checksum = 0;
 let humidity_msb = 0;
 let humidity_lsb = 0;
 let humidity_checksum = 0;
-//% color=#4c6ef5 weight=25 icon="\uf043" block="SHT2x Sensor"
+//% color=#4c6ef5 weight=25 icon="\uf043" block="SHT3x Sensor"
 namespace CipSHT3xDriver {
    
     pins.i2cWriteNumber(I2C_ADDRESS, TEMP_CMD, NumberFormat.UInt8BE, false);
