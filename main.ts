@@ -1,57 +1,50 @@
-enum temphum {
-    temp,
-    hum
-}
-//% color=#4c6ef5 weight=25 icon="\uf043" block="Sensor SHT3x"
-namespace CIPSHT31 {
-    let i2cAddress = 0x44;
-    let SHT31_MEAS_HIGHREP_STRETCH = 0x2C06;
-    let SHT31_MEAS_MEDREP_STRETCH = 0x2C0D;
-    let SHT31_MEAS_LOWREP_STRETCH = 0x2C10;
-    let SHT31_MEAS_HIGHREP = 0x2400;
-    let SHT31_MEAS_MEDREP = 0x240B;
-    let SHT31_MEAS_LOWREP = 0x241;
-    let SHT31_CLEARSTATUS = 0x3041;
-    let SHT31_SOFTRESET = 0x30A2;
-    let SHT31_HEATEREN = 0x306D;
-    let SHT31_HEATERDIS = 0x3066;
-    let SHT31_REG_HEATER_BIT = 0x0d;
+let I2C_ADDRESS = 0x44;
+let TEMP_CMD = 0x2C;
+let HUMIDITY_CMD = 0x2C;
+let READ_REG = 0xE7;
 
-    let t = 0;
-    let h = 0;
+let temp_msb = 0;
+let temp_lsb = 0;
+let temp_checksum = 0;
+let humidity_msb = 0;
+let humidity_lsb = 0;
+let humidity_checksum = 0;
+//% color=#4c6ef5 weight=25 icon="\uf043" block="SHT2x Sensor"
+namespace CipSHT3xDriver {
+   
+    pins.i2cWriteNumber(I2C_ADDRESS, TEMP_CMD, NumberFormat.UInt8BE, false);
+    basic.pause(20);
+    temp_msb = pins.i2cReadNumber(I2C_ADDRESS, NumberFormat.UInt8BE);
+    temp_lsb = pins.i2cReadNumber(I2C_ADDRESS, NumberFormat.UInt8BE);
+    temp_checksum = pins.i2cReadNumber(I2C_ADDRESS, NumberFormat.UInt8BE);
+
+    // Enviar comando para leer la humedad
+    pins.i2cWriteNumber(I2C_ADDRESS, HUMIDITY_CMD, NumberFormat.UInt8BE, false);
+    basic.pause(20);
+    humidity_msb = pins.i2cReadNumber(I2C_ADDRESS, NumberFormat.UInt8BE);
+    humidity_lsb = pins.i2cReadNumber(I2C_ADDRESS, NumberFormat.UInt8BE);
+    humidity_checksum = pins.i2cReadNumber(I2C_ADDRESS, NumberFormat.UInt8BE);
+    /**
+     * Read Relative Humidity from the SHT3x Sensor.
+     * Returns a number describing the relative humidity in percentage % relative
+     * humidity
+    */
+    //% blockId="SHT3x_read_humidity"
+    //% block="Leer Humedad"
+    export function read_humidity(): number {
+        let humidity = (((humidity_msb * 256) + humidity_lsb) * 100) / 65535.0;
+        return humidity;
+    }
     /**
      * Read Temperature in degrees celcius from the SHT3x sensor.
      * Returns a number describing the ambient temperature in degrees celsius
     */
-    //% blockId="CIPSHT31_leer_temperatura"
-    //% block="read temperature"
-    export function leer_temperatura(): number {
-        pins.i2cWriteNumber(i2cAddress, 0xFF, NumberFormat.UInt8LE, false);
-        basic.pause(100);
-        let buff = pins.i2cReadBuffer(i2cAddress, 3);
-        let result = buff[0] << 8;
-        result |= buff[1];
-        result = (((4375 * result) >> 14) - 4500) / 100;
-        return result;
+    //% blockId="SHT3xDriver_read_temperature"
+    //% block="Leer Temperatura"
+    export function read_temperature(): number {
+        let temperature = ((((temp_msb * 256) + temp_lsb) * 175) / 65535.0) - 45;
+        return temperature;
     }
-
-    /**
-   * Read Relative Humidity from the SHT3x Sensor.
-   * Returns a number describing the relative humidity in percentage % relative
-   * humidity
-  */
-    //% blockId="CIPSHT31_leer_humedad"
-    //% block="read humidity"
-
-    export function leer_humedad(): number {
-        pins.i2cWriteNumber(i2cAddress, 0xFF, NumberFormat.UInt8LE, false);
-        basic.pause(100);
-        let buff = pins.i2cReadBuffer(i2cAddress, 3);
-        let result = buff[0] << 8;
-        result |= buff[1];
-        result = (((625 * result) >> 12)) / 1000;
-        return result;
-    }
-
-
+    
 }
+
