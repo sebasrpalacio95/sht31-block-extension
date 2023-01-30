@@ -31,7 +31,7 @@ namespace CIPSHT31 {
         let buff = pins.i2cReadBuffer(i2cAddress, 3);
         let result = buff[0] << 8;
         result |= buff[1];
-        result = (((21965 * result) >> 13) - 46850) / 1000;
+        result = (((4375 * result) >> 14) - 4500) / 100;
         return result;
     }
 
@@ -49,7 +49,7 @@ namespace CIPSHT31 {
         let buff = pins.i2cReadBuffer(i2cAddress, 3);
         let result = buff[0] << 8;
         result |= buff[1];
-        result = (((15625 * result) >> 13) - 6000) / 1000;
+        result = (((625 * result) >> 12)) / 1000;
         return result;
     }
 
